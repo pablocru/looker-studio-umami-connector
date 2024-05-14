@@ -1,0 +1,25 @@
+{
+  "dsccConnector": {
+    "production": "AKfycbznhh0vBtsC3lMZf8KjKNer252M0NEqNPxf5GmZM48Gw4N2Yjy4FuIPUo7Tnv5j3s2EDw",
+    "latest": "AKfycbz4DM0dVaOQ5I0brmrrCs_u2QmvLQ7oy_H7GeMt0OUy"
+  },
+  "scripts": {
+    "generate_clasp": "node --env-file=.env clasp-generator.js",
+    "prettier": "prettier --write \"src/**/*.ts\"",
+    "push": "dscc-scripts connector push_changes",
+    "watch": "dscc-scripts connector watch_changes",
+    "open": "dscc-scripts connector open_script",
+    "open_template": "dscc-scripts connector open_template",
+    "try_production": "dscc-scripts connector try_production",
+    "try_latest": "dscc-scripts connector try_latest",
+    "update_production": "dscc-scripts connector update_production"
+  },
+  "devDependencies": {
+    "@google/clasp": "^2.2.1",
+    "@google/dscc-scripts": "^1.0.17",
+    "@types/google-apps-script": "^0.0.54",
+    "@types/google-apps-script-oauth2": "^24.0.1",
+    "prettier": "^1.18.2",
+    "typescript": "^3.5.3"
+  }
+}
