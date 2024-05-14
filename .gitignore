@@ -1,0 +1,8 @@
+# Dependencies
+node_modules
+
+# Apps Script Secrets
+.clasp.json
+
+# Environment variables
+.env
