@@ -3,111 +3,111 @@
 // best we can do for now.
 
 // getAuthType
-type GetAuthTypeResponse = Object;
+type GetAuthTypeResponse = Object
 
 // getSchema
 
 interface GetSchemaRequest<T> {
-  configParams: T;
+  configParams: T
 }
 interface GetSchemaResponse {
-  schema: Object[];
+  schema: Object[]
 }
 
 // getConfig
 
 interface GetConfigRequest {
-  languageCode: string;
+  languageCode: string
 }
-type GetConfigResponse = Object;
+type GetConfigResponse = Object
 
 // getData
 
 interface DefaultConfigParams {
-  [configId: string]: string;
+  [configId: string]: string
 }
 interface GetDataRequest<T> {
-  configParams?: T;
+  configParams?: T
   scriptParams: {
-    sampleExtraction: boolean;
-    lastRefresh: string;
-  };
+    sampleExtraction: boolean
+    lastRefresh: string
+  }
   dateRange?: {
-    startDate: string;
-    endDate: string;
-  };
+    startDate: string
+    endDate: string
+  }
   fields: Array<{
-    name: string;
-  }>;
+    name: string
+  }>
 }
 
-type GetDataRowValue = string | number | boolean;
+type GetDataRowValue = string | number | boolean
 interface GetDataRow {
-  values: Array<GetDataRowValue>;
+  values: GetDataRowValue[]
 }
-type GetDataRows = Array<GetDataRow>;
+type GetDataRows = GetDataRow[]
 
 interface GetDataResponse {
-  schema: Object[];
-  rows: GetDataRows;
+  schema: Object[]
+  rows: GetDataRows
 }
 
 // setCredentials
 interface UserPassCredentials {
   userPass: {
-    username: string;
-    password: string;
-  };
+    username: string
+    password: string
+  }
 }
 
 interface UserTokenCredentials {
   userToken: {
-    username: string;
-    token: string;
-  };
+    username: string
+    token: string
+  }
 }
 
 interface KeyCredentials {
-  key: string;
+  key: string
 }
 
 interface PathUserPassCredentials {
   pathUserPass: {
-    path: string;
-    username: string;
-    password: string;
-  };
+    path: string
+    username: string
+    password: string
+  }
 }
 
 type SetCredentialsRequest =
   | UserPassCredentials
   | UserTokenCredentials
   | KeyCredentials
-  | PathUserPassCredentials;
+  | PathUserPassCredentials
 
 interface SetCredentialsResponse {
-  errorCode: 'NONE' | 'INVALID_CREDENTIALS';
+  errorCode: 'NONE' | 'INVALID_CREDENTIALS'
 }
 
-type Fields = GoogleAppsScript.Data_Studio.Fields;
+type Fields = GoogleAppsScript.Data_Studio.Fields
 
 // Useful connector functions
-type GetFields = () => Fields;
+type GetFields = () => Fields
 
 // Connector Function Types
 
-type IsAdminUser = () => boolean;
-type GetConfig = (request: GetConfigRequest) => GetConfigResponse;
+type IsAdminUser = () => boolean
+type GetConfig = (request: GetConfigRequest) => GetConfigResponse
 type GetData<T = DefaultConfigParams> = (
   request: GetDataRequest<T>
-) => GetDataResponse;
+) => GetDataResponse
 type GetSchema<T = DefaultConfigParams> = (
   request: GetSchemaRequest<T>
-) => GetSchemaResponse;
-type IsAuthValid = () => boolean;
-type ResetAuth = () => void;
-type AuthCallback = (request: object) => GoogleAppsScript.HTML.HtmlOutput;
+) => GetSchemaResponse
+type IsAuthValid = () => boolean
+type ResetAuth = () => void
+type AuthCallback = (request: object) => GoogleAppsScript.HTML.HtmlOutput
 type SetCredentials = (
   request: SetCredentialsRequest
-) => SetCredentialsResponse;
-type GetAuthType = () => GetAuthTypeResponse;
+) => SetCredentialsResponse
+type GetAuthType = () => GetAuthTypeResponse
