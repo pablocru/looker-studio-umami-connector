@@ -1,15 +1,16 @@
 {
+  "timeZone": "America/New_York",
   "dependencies": {
-    "libraries": []
   },
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
   "dataStudio": {
     "name": "ts-umami-connector",
-    "logoUrl": "logoUrl",
+    "description": "description",
     "company": "manifestCompany",
     "companyUrl": "companyUrl",
+    "logoUrl": "logoUrl",
     "addonUrl": "addonUrl",
-    "supportUrl": "supportUrl",
-    "description": "description",
-    "sources": [""]
+    "supportUrl": "supportUrl"
   }
 }

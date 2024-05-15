@@ -1,104 +1,71 @@
-const cc = DataStudioApp.createCommunityConnector()
+// Store ---------------------------------------------------------------------------------
+const cc = DataStudioApp.createCommunityConnector();
 
-// https://developers.google.com/datastudio/connector/reference#isadminuser
-const isAdminUser: IsAdminUser = () => {
-  return false
+const scriptProperties = PropertiesService.getScriptProperties();
+const UMAMI_API_ENDPOINT = scriptProperties.getProperty("umami_api_endpoint");
+
+const USER_PROPERTY_TOKEN = "dscc.token";
+
+// Authentication ------------------------------------------------------------------------
+function getAuthType() {
+  const AuthTypes = cc.AuthType;
+  return cc
+    .newAuthTypeResponse()
+    .setAuthType(AuthTypes.USER_PASS)
+    .setHelpUrl("https://umami.is/docs/api/authentication")
+    .build();
 }
 
-// https://developers.google.com/datastudio/connector/reference#getconfig
-const getConfig: GetConfig = () => {
-  const config = cc.getConfig()
+type CredentialsRequest = {
+  userPass: {
+    username: string;
+    password: string;
+  };
+};
 
-  config
-    .newInfo()
-    .setId('generalInfo')
-    .setText(
-      'This is the template connector created by ' +
-      'https://github.com/googledatastudio/dscc-gen'
-    )
+function setCredentials(
+  request: CredentialsRequest
+): GoogleAppsScript.Data_Studio.SetCredentialsResponse {
+  const { username, password } = request.userPass;
 
-  config
-    .newSelectSingle()
-    .setId('units')
-    .setName('Units')
-    .setHelpText('Metric or Imperial Units')
-    .setAllowOverride(true)
-    .addOption(
-      config
-        .newOptionBuilder()
-        .setLabel('Metric')
-        .setValue('metric')
-    )
-    .addOption(
-      config
-        .newOptionBuilder()
-        .setLabel('Imperial')
-        .setValue('imperial')
-    )
+  const response = UrlFetchApp.fetch(UMAMI_API_ENDPOINT + "/api/auth/login", {
+    method: "post",
+    payload: { username, password },
+    muteHttpExceptions: true,
+  });
 
-  return config.build()
-}
+  const isValid = response.getResponseCode() === 200;
 
-const getFields = (): Fields => {
-  const fields = cc.getFields()
-  const types = cc.FieldType
-  const aggregations = cc.AggregationType
+  if (isValid) {
+    const userProperties = PropertiesService.getUserProperties();
 
-  fields
-    .newDimension()
-    .setId('id')
-    .setName('Id')
-    .setType(types.TEXT)
+    const result = JSON.parse(response.getContentText());
 
-  fields
-    .newMetric()
-    .setId('distance')
-    .setName('Distance')
-    .setType(types.NUMBER)
-    .setAggregation(aggregations.SUM)
-
-  return fields
-}
-
-// https://developers.google.com/datastudio/connector/reference#getschema
-const getSchema: GetSchema = () => {
-  return { schema: getFields().build() }
-}
-
-// https://developers.google.com/datastudio/connector/reference#getdata
-const getData: GetData = (request) => {
-  // Calling `UrlFetchApp.fetch()` makes this connector require authentication.
-  UrlFetchApp.fetch('https://google.com')
-
-  const requestedFields = getFields().forIds(
-    request.fields.map((field) => field.name)
-  )
-
-  // Convert from miles to kilometers if 'metric' units were picked.
-  let unitMultiplier = 1
-  if (request.configParams.units === 'metric') {
-    unitMultiplier = 1.60934
+    userProperties.setProperty(USER_PROPERTY_TOKEN, result.token);
   }
 
-  const rows: GetDataRows = []
-  for (let i = 0; i < 100; i++) {
-    const rowValues: GetDataRowValue[] = []
-    requestedFields.asArray().forEach((field) => {
-      switch (field.getId()) {
-        case 'id':
-          return rowValues.push('id_' + i)
-        case 'distance':
-          return rowValues.push(i * unitMultiplier)
-        default:
-          return rowValues.push('')
-      }
-    })
-    const row: GetDataRow = { values: rowValues }
-    rows.push(row)
-  }
-
-  return {
-    schema: requestedFields.build(),
-    rows
-  }
+  return cc.newSetCredentialsResponse().setIsValid(isValid).build();
 }
+
+function resetAuth() {
+  const userProperties = PropertiesService.getUserProperties();
+  userProperties.deleteProperty(USER_PROPERTY_TOKEN);
+}
+
+function isAuthValid() {
+  const userProperties = PropertiesService.getUserProperties();
+  const token = userProperties.getProperty(USER_PROPERTY_TOKEN);
+
+  const response = UrlFetchApp.fetch(UMAMI_API_ENDPOINT + "/api/auth/verify", {
+    method: "post",
+    headers: { Authorization: `Bearer "${token}"` },
+    muteHttpExceptions: true,
+  });
+
+  return response.getResponseCode() === 200;
+}
+// ---------------------------------------------------------------------------------------
+
+function getConfig() {}
+function getSchema() {}
+function getData() {}

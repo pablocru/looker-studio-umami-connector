@@ -2,6 +2,7 @@
   "compilerOptions": {
     "lib": ["esnext"],
     "experimentalDecorators": true,
-    "types": ["google-apps-script", "google-apps-script-oauth2"]
+    "types": ["google-apps-script", "google-apps-script-oauth2"],
+    "strict": true
   }
 }
