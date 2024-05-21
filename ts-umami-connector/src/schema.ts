@@ -1,4 +1,36 @@
 // Schema --------------------------------------------------------------------------------
+function getSchema(request: CCRequest): SchemaResponse {
+  const apiPath = request.configParams[API_PATH_ID];
+
+  let fields: GoogleAppsScript.Data_Studio.Fields | undefined;
+  switch (apiPath) {
+    case ACTIVE_PATH:
+      fields = getSchemaOfActiveUsers();
+      break;
+    case EVENTS_PATH:
+      fields = getSchemaOfEvents();
+      break;
+    case PAGE_VIEW_PATH:
+      fields = getSchemaOfPageViews();
+      break;
+    case STATS_PATH:
+      fields = getSchemaOfStats();
+    case METRICS_PATH:
+      fields = getSchemaOfMetrics();
+      break;
+    default:
+      cc.newUserError().setText("Invalid API path: " + apiPath).throwException();
+      break;
+  }
+
+  if (!fields) {
+    const errMessage = "Error while creating the schema: the fields are empty";
+    cc.newUserError().setText(errMessage).throwException();
+  }
+
+  return { "schema": fields!.build() };
+}
+
 function getSchemaOfActiveUsers(): GoogleAppsScript.Data_Studio.Fields {
   const fields = cc.getFields();
   const types = cc.FieldType;
@@ -35,21 +67,6 @@ function getSchemaOfPageViews(): GoogleAppsScript.Data_Studio.Fields {
 
   fields.newDimension()
     .setId("timestamp")
-    .setType(types.TEXT);
-
-  fields.newDimension()
-    .setId("number_of_visitors")
-    .setType(types.NUMBER);
-
-  return fields;
-}
-
-function getSchemaOfMetrics(): GoogleAppsScript.Data_Studio.Fields {
-  const fields = cc.getFields();
-  const types = cc.FieldType;
-
-  fields.newDimension()
-    .setId("metric_type")
     .setType(types.TEXT);
 
   fields.newDimension()
@@ -105,35 +122,18 @@ function getSchemaOfStats(): GoogleAppsScript.Data_Studio.Fields {
   return fields;
 }
 
-function getSchema(request: CCRequest): SchemaResponse {
-  const apiPath = request.configParams[API_PATH_ID];
+function getSchemaOfMetrics(): GoogleAppsScript.Data_Studio.Fields {
+  const fields = cc.getFields();
+  const types = cc.FieldType;
 
-  let fields: GoogleAppsScript.Data_Studio.Fields | undefined;
-  switch (apiPath) {
-    case ACTIVE_PATH:
-      fields = getSchemaOfActiveUsers();
-      break;
-    case EVENTS_PATH:
-      fields = getSchemaOfEvents();
-      break;
-    case PAGE_VIEW_PATH:
-      fields = getSchemaOfPageViews();
-      break;
-    case STATS_PATH:
-      fields = getSchemaOfStats();
-    case METRICS_PATH:
-      fields = getSchemaOfMetrics();
-      break;
-    default:
-      cc.newUserError().setText("Invalid API path: " + apiPath).throwException();
-      break;
-  }
+  fields.newDimension()
+    .setId("metric_type")
+    .setType(types.TEXT);
 
-  if (!fields) {
-    const errMessage = "Error while creating the schema: the fields are empty";
-    cc.newUserError().setText(errMessage).throwException();
-  }
+  fields.newDimension()
+    .setId("number_of_visitors")
+    .setType(types.NUMBER);
 
-  return { "schema": fields!.build() };
+  return fields;
 }
 // ---------------------------------------------------------------------------------------
