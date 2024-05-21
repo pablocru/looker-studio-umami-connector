@@ -15,6 +15,18 @@ function getData(request: CCRequest) {
     case EVENTS_PATH:
       response = fetchEvents(configParams, dateRange, token);
       break;
+
+    case PAGE_VIEW_PATH:
+      response = fetchPageViews(configParams, dateRange, token);
+      break;
+
+    case STATS_PATH:
+      response = fetchStats(configParams, dateRange, token);
+      break;
+
+    case METRICS_PATH:
+      response = fetchMetrics(configParams, dateRange, token);
+      break;
   }
 
   if (!response) {
@@ -38,9 +50,9 @@ function getData(request: CCRequest) {
   const parsedResponse = JSON.parse(responseText)
 
   const rows =
-    !Array.isArray(parsedResponse) ?
-      [{ values: [parsedResponse.x] }] :
-      parsedResponse.map((data: any) => ({ values: Object.values(data) }));
+    Array.isArray(parsedResponse) ?
+    parsedResponse.map((data: any) => ({ values: Object.values(data) })) :
+    [{ values: [parsedResponse.x] }];
 
   return Object.assign({}, getSchema(request), { rows });
 }
@@ -59,18 +71,172 @@ function fetchActiveUsers(configParams: ConfigParams, token: string) {
   );
 }
 
-function fetchEvents(configParams: ConfigParams, dateRange: DateRange, token: string) {
+function fetchEvents(
+  configParams: EventsConfigParams,
+  dateRange: DateRange,
+  token: string
+) {
+  const { api_path, event_time_unit, event_timezone, url, website_id } = configParams;
+
   return fetchData(
     (
       UMAMI_API_ENDPOINT +
       "/api/websites/" +
-      configParams[WEBSITE_ID_INPUT_ID] +
+      website_id +
       "/" +
-      configParams[API_PATH_ID] +
+      api_path +
       "?startAt=" + getTimestamp(dateRange.startDate) +
       "&endAt=" + getTimestamp(dateRange.endDate) +
-      "&unit=" + configParams[EVENT_TIME_UNIT_ID] +
-      "&timezone=" + configParams[EVENT_TIMEZONE_ID]
+      "&unit=" + event_time_unit +
+      "&timezone=" + event_timezone +
+      createOptionalQueryParams({ url })
+    ),
+    "get",
+    token
+  );
+}
+
+function fetchPageViews(
+  configParams: PageViewsConfigParams,
+  dateRange: DateRange,
+  token: string
+) {
+  const {
+    api_path,
+    browser,
+    city,
+    country,
+    device,
+    event_time_unit,
+    event_timezone,
+    os,
+    page_title,
+    referrer,
+    region,
+    url,
+    website_id
+  } = configParams;
+
+  return fetchData(
+    (
+      UMAMI_API_ENDPOINT +
+      "/api/websites/" +
+      website_id +
+      "/" +
+      api_path +
+      "?startAt=" + getTimestamp(dateRange.startDate) +
+      "&endAt=" + getTimestamp(dateRange.endDate) +
+      "&unit=" + event_time_unit +
+      "&timezone=" + event_timezone +
+      createOptionalQueryParams({
+        browser,
+        city,
+        country,
+        device,
+        os,
+        page_title,
+        referrer,
+        region,
+        url,
+      })
+    ),
+    "get",
+    token
+  );
+}
+
+function fetchStats(
+  configParams: StatsConfigParams,
+  dateRange: DateRange,
+  token: string
+) {
+  const {
+    api_path,
+    browser,
+    city,
+    country,
+    device,
+    os,
+    page_title,
+    referrer,
+    region,
+    url,
+    website_id
+  } = configParams;
+
+  return fetchData(
+    (
+      UMAMI_API_ENDPOINT +
+      "/api/websites/" +
+      website_id +
+      "/" +
+      api_path +
+      "?startAt=" + getTimestamp(dateRange.startDate) +
+      "&endAt=" + getTimestamp(dateRange.endDate) +
+      createOptionalQueryParams({
+        browser,
+        city,
+        country,
+        device,
+        os,
+        page_title,
+        referrer,
+        region,
+        url,
+      })
+    ),
+    "get",
+    token
+  );
+}
+
+function fetchMetrics(
+  configParams: MetricsConfigParams,
+  dateRange: DateRange,
+  token: string
+) {
+  const {
+    api_path,
+    browser,
+    city,
+    country,
+    device,
+    event,
+    language,
+    limit,
+    os,
+    page_title,
+    referrer,
+    region,
+    type,
+    url,
+    website_id,
+  } = configParams;
+
+  return fetchData(
+    (
+      UMAMI_API_ENDPOINT +
+      "/api/websites/" +
+      website_id +
+      "/" +
+      api_path +
+      "?startAt=" + getTimestamp(dateRange.startDate) +
+      "&endAt=" + getTimestamp(dateRange.endDate) +
+      "&type=" + type +
+      createOptionalQueryParams({
+        browser,
+        city,
+        country,
+        device,
+        event,
+        language,
+        limit,
+        os,
+        page_title,
+        referrer,
+        region,
+        url,
+      })
     ),
     "get",
     token
@@ -91,5 +257,17 @@ function fetchData(
 
 function getTimestamp(date: string) {
   return new Date(date).getTime()
+}
+
+function createOptionalQueryParams(...params: ({ [key: string]: string | undefined })[]) {
+  return params.reduce((lastParam, currentParam) => {
+    const [key, value] = Object.entries(currentParam)[0];
+
+    if (!value) return lastParam;
+
+    const newParam = "&" + key + "=" + value;
+
+    return lastParam + newParam;
+  }, "");
 }
 // ---------------------------------------------------------------------------------------
