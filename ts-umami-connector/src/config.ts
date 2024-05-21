@@ -38,15 +38,33 @@ function getConfig(request?: ConnectorRequest) {
     if (apiPath !== ACTIVE_PATH) {
       switch (apiPath) {
         case EVENTS_PATH:
-          config.newTextInput()
-            .setId(EVENT_TIME_UNIT_ID)
-            .setName("Time unit");
-
-          config.newTextInput()
-            .setId(EVENT_TIMEZONE_ID)
-            .setName("Timezone");
+          getTimeRelatedInputs(config);
+          getUrlInput(config);
+          break;
+        case PAGE_VIEW_PATH:
+          getTimeRelatedInputs(config);
+          getCommonInputs(config);
+          break;
+        case STATS_PATH:
+          getCommonInputs(config);
+          break;
+        case METRICS_PATH:
+          // Selector of metrics
+          const selectType = config.newSelectSingle()
+            .setId(TYPE_ID)
+            .setName("Metrics type");
+          for (const type of [
+            "url", "referrer", "browser", "os", "device", "country", "event"
+          ]) {
+            selectType.addOption(
+              config.newOptionBuilder().setLabel(type).setValue(type)
+            );
+          }
+          getCommonInputs(config);
+          getMetricInputs(config);
           break;
         default:
+          cc.newUserError().setText("Invalid API path: " + apiPath).throwException();
           break;
       }
 
@@ -57,5 +75,71 @@ function getConfig(request?: ConnectorRequest) {
   }
 
   return config.build();
+}
+
+function getTimeRelatedInputs(config: GoogleAppsScript.Data_Studio.Config) {
+  config.newTextInput()
+    .setId(TIME_UNIT_ID)
+    .setName("Time unit");
+
+  config.newTextInput()
+    .setId(TIMEZONE_ID)
+    .setName("Timezone");
+}
+
+function getUrlInput(config: GoogleAppsScript.Data_Studio.Config) {
+  config.newTextInput()
+    .setId(URL_ID)
+    .setName("(optional) Name of URL");
+}
+
+function getCommonInputs(config: GoogleAppsScript.Data_Studio.Config) {
+  getUrlInput(config);
+
+  config.newTextInput()
+    .setId(REFERRER_ID)
+    .setName("(optional) Name of referrer");
+
+  config.newTextInput()
+    .setId(PAGE_TITLE_ID)
+    .setName("(optional) Name of page title");
+
+  config.newTextInput()
+    .setId(OS_ID)
+    .setName("(optional) Name of operating system");
+
+  config.newTextInput()
+    .setId(BROWSER_ID)
+    .setName("(optional) Name of browser");
+
+  config.newTextInput()
+    .setId(DEVICE_ID)
+    .setName("(optional) Name of device (ex. Mobile)");
+
+  config.newTextInput()
+    .setId(COUNTRY_ID)
+    .setName("(optional) Name of country");
+
+  config.newTextInput()
+    .setId(REGION_ID)
+    .setName("(optional) Name of region/state/province");
+
+  config.newTextInput()
+    .setId(CITY_ID)
+    .setName("(optional) Name of city");
+}
+
+function getMetricInputs(config: GoogleAppsScript.Data_Studio.Config) {
+  config.newTextInput()
+    .setId(LANGUAGE_ID)
+    .setName("(optional) Name of language");
+
+  config.newTextInput()
+    .setId(EVENT_ID)
+    .setName("(optional) Name of event");
+
+  config.newTextInput()
+    .setId(LIMIT_ID)
+    .setName("(optional, default 500) Number of events returned");
 }
 // ---------------------------------------------------------------------------------------
