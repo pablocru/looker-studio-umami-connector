@@ -26,7 +26,7 @@ const LIMIT_ID = "limit";
 
 const ACTIVE_PATH = "active";
 const EVENTS_PATH = "events";
-const PAGE_VIEW_PATH = "page_view";
+const PAGE_VIEW_PATH = "pageviews";
 const STATS_PATH = "stats";
 const METRICS_PATH = "metrics";
 const VALID_PATHS = [
