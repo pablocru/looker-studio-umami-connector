@@ -70,7 +70,11 @@ function getSchemaOfPageViews(): GoogleAppsScript.Data_Studio.Fields {
     .setType(types.TEXT);
 
   fields.newDimension()
-    .setId("number_of_visitors")
+    .setId("page_views")
+    .setType(types.NUMBER);
+
+  fields.newDimension()
+    .setId("sessions")
     .setType(types.NUMBER);
 
   return fields;
