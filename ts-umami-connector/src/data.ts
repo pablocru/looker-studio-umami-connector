@@ -49,10 +49,21 @@ function getData(request: CCRequest) {
 
   const parsedResponse = JSON.parse(responseText)
 
-  const rows =
-    Array.isArray(parsedResponse) ?
-    parsedResponse.map((data: any) => ({ values: Object.values(data) })) :
-    [{ values: [parsedResponse.x] }];
+  let rows: { values: any[] }[];
+  switch (true) {
+    case apiPath === STATS_PATH:
+      rows = getStatsRows(parsedResponse);
+      break;
+    case apiPath === PAGE_VIEW_PATH:
+      rows = getPageViewsRows(parsedResponse);
+      break;
+    case Array.isArray(parsedResponse):
+      rows = parsedResponse.map((data: any) => ({ values: Object.values(data) }));
+      break;
+    default:
+      rows = [{ values: [parsedResponse.x] }]
+      break;
+  }
 
   return Object.assign({}, getSchema(request), { rows });
 }
@@ -66,7 +77,6 @@ function fetchActiveUsers(configParams: ConfigParams, token: string) {
       "/" +
       configParams[API_PATH_ID]
     ),
-    "get",
     token
   );
 }
@@ -91,7 +101,6 @@ function fetchEvents(
       "&timezone=" + event_timezone +
       createOptionalQueryParams({ url })
     ),
-    "get",
     token
   );
 }
@@ -140,7 +149,6 @@ function fetchPageViews(
         url,
       })
     ),
-    "get",
     token
   );
 }
@@ -185,7 +193,6 @@ function fetchStats(
         url,
       })
     ),
-    "get",
     token
   );
 }
@@ -238,18 +245,13 @@ function fetchMetrics(
         url,
       })
     ),
-    "get",
     token
   );
 }
 
-function fetchData(
-  url: string,
-  method: GoogleAppsScript.URL_Fetch.HttpMethod,
-  token: string
-) {
+function fetchData(url: string, token: string) {
   return UrlFetchApp.fetch(encodeURI(url), {
-    method,
+    method: "get",
     headers: { Authorization: "Bearer " + token },
     muteHttpExceptions: true
   });
@@ -269,5 +271,60 @@ function createOptionalQueryParams(...params: ({ [key: string]: string | undefin
 
     return lastParam + newParam;
   }, "");
+}
+
+type StatsResponseMetric = { "value": number, "change": number }
+type StatsResponse = {
+  pageviews: StatsResponseMetric,
+  visitors: StatsResponseMetric,
+  visits: StatsResponseMetric,
+  bounces: StatsResponseMetric,
+  totaltime: StatsResponseMetric
+}
+function getStatsRows(statsResponse: StatsResponse) {
+  const values = [];
+
+  let metric: keyof StatsResponse;
+  for (metric in statsResponse) {
+    const { value, change } = statsResponse[metric];
+  
+    values.push(value, change);
+  }
+
+  return [{ values }];
+}
+
+type PageViewsResponseMetric = { x: string, y: number }
+type PageViewsResponse = {
+  pageviews: PageViewsResponseMetric[]
+  sessions: PageViewsResponseMetric[]
+}
+function getPageViewsRows (pageViewsResponse: PageViewsResponse) {
+  const { pageviews, sessions } = pageViewsResponse;
+
+  pageviews.sort(sortDatesFromObject);
+  sessions.sort(sortDatesFromObject);
+
+  function sortDatesFromObject (
+    pageView: PageViewsResponseMetric,
+    session: PageViewsResponseMetric
+  ) {
+    const { x } = pageView;
+    const { x: y } = session;
+
+    return (
+      x > y ? 1 :
+        x < y ? -1 : 0
+    )
+  }
+
+  const rows = [];
+  for (let i = 0; i < pageviews.length; i++) {
+    const pageView = pageviews[i];
+    const session = sessions[i];
+
+    rows.push({ values: [pageView.x, pageView.y, session.y] })
+  }
+  return rows;
 }
 // ---------------------------------------------------------------------------------------
