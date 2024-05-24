@@ -1,11 +1,11 @@
 {
-  "timeZone": "America/New_York",
+  "timeZone": "Europe/Madrid",
   "dependencies": {
   },
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8",
   "dataStudio": {
-    "name": "ts-umami-connector",
+    "name": "self-hosted-umami-connector",
     "description": "description",
     "company": "manifestCompany",
     "companyUrl": "companyUrl",

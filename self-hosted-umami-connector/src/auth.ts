@@ -1,11 +1,3 @@
-// Store ---------------------------------------------------------------------------------
-const cc = DataStudioApp.createCommunityConnector();
-
-const scriptProperties = PropertiesService.getScriptProperties();
-const UMAMI_API_ENDPOINT = scriptProperties.getProperty("umami_api_endpoint");
-
-const USER_PROPERTY_TOKEN = "dscc.token";
-
 // Authentication ------------------------------------------------------------------------
 function getAuthType() {
   const AuthTypes = cc.AuthType;
@@ -65,7 +57,3 @@ function isAuthValid() {
   return response.getResponseCode() === 200;
 }
 // ---------------------------------------------------------------------------------------
-
-function getConfig() {}
-function getSchema() {}
-function getData() {}
