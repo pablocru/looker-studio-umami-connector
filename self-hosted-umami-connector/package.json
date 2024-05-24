@@ -1,5 +1,5 @@
 {
-  "name": "umami-connector",
+  "name": "self-hosted-umami-connector",
   "scripts": {
     "generate_clasp": "node --env-file=.env clasp-generator.js",
     "push": "clasp push"
