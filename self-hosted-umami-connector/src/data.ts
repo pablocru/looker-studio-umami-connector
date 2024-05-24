@@ -261,16 +261,20 @@ function getTimestamp(date: string) {
   return new Date(date).getTime()
 }
 
-function createOptionalQueryParams(...params: ({ [key: string]: string | undefined })[]) {
-  return params.reduce((lastParam, currentParam) => {
-    const [key, value] = Object.entries(currentParam)[0];
+function createOptionalQueryParams(
+  params: { [key: string]: unknown; } | ArrayLike<unknown>
+) {
+  const defaultParam = "";
 
-    if (!value) return lastParam;
+  if (!params) return defaultParam;
+
+  return Object.entries(params).reduce((lastParam, [key, value]) => {
+    if (!key || !value) return lastParam;
 
     const newParam = "&" + key + "=" + value;
 
     return lastParam + newParam;
-  }, "");
+  }, defaultParam)
 }
 
 type StatsResponseMetric = { "value": number, "change": number }
