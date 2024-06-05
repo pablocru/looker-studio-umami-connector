@@ -15,6 +15,7 @@ function getSchema(request: CCRequest): SchemaResponse {
       break;
     case STATS_PATH:
       fields = getSchemaOfStats();
+      break;
     case METRICS_PATH:
       fields = getSchemaOfMetrics();
       break;
